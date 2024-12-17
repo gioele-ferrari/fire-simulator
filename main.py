@@ -14,9 +14,9 @@ screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 MAP_WIDTH: int = SCREEN_WIDTH // TILE_SIZE
 MAP_HEIGHT: int = SCREEN_HEIGHT // TILE_SIZE
 
-FOREST_DENSITY: int = 0.9 # Densità del 20%
-GROW_CHANCE = 0.2
-FIRE_CHANCE = 0.1
+FOREST_DENSITY: int = 0.6
+GROW_CHANCE = 0.0
+FIRE_CHANCE = 0.0
 
 COLOR_GREEN = (137, 234, 123)
 TREE_IMG = pygame.image.load(os.path.join("images", "tree.png")).convert_alpha()
@@ -25,9 +25,13 @@ TREE_IMG = pygame.transform.scale(TREE_IMG, (TILE_SIZE, TILE_SIZE))
 FIRE_IMG = pygame.image.load(os.path.join("images", "fire.png")).convert_alpha()
 FIRE_IMG = pygame.transform.scale(FIRE_IMG, (TILE_SIZE, TILE_SIZE))
 
-STEP_TIMER = 1.2
+BONFIRE_IMG = pygame.image.load(os.path.join("images", "bonfire.png")).convert_alpha()
+BONFIRE_IMG = pygame.transform.scale(BONFIRE_IMG, (TILE_SIZE, TILE_SIZE))
+
+STEP_TIMER = 2
 
 FIRE_SYMBOL = "F"
+BONFIRE_SYMBOL = "B"
 TREE_SYMBOL = "T"
 NEW_SYMBOL = "N"
 EMPTY_SYMBOL = "E"
@@ -50,12 +54,17 @@ def main() -> None:
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
-            if event.type == pygame.KEYDOWN:
+            elif event.type == pygame.KEYDOWN:
                 if event.key== pygame.K_r:
                     forest = generate_forest()
                     start_simulation = False
                 elif event.key== pygame.K_SPACE:
                     start_simulation = True
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                x_coord = event.pos[0] // TILE_SIZE
+                y_coord = event.pos[1] // TILE_SIZE
+                if x_coord >= 0 and x_coord <= MAP_WIDTH and y_coord >= 0 and y_coord <= MAP_HEIGHT:
+                    forest[x_coord][y_coord] = BONFIRE_SYMBOL
 
         screen.fill(COLOR_GREEN)
         display_forest(forest)
@@ -91,6 +100,8 @@ def display_forest(forest) -> None:
                 screen.blit(TREE_IMG, (x_coord * TILE_SIZE, y_coord * TILE_SIZE))
             elif forest[x_coord][y_coord] == FIRE_SYMBOL:
                 screen.blit(FIRE_IMG, (x_coord * TILE_SIZE, y_coord * TILE_SIZE))
+            elif forest[x_coord][y_coord] == BONFIRE_SYMBOL:
+                screen.blit(BONFIRE_IMG, (x_coord * TILE_SIZE, y_coord * TILE_SIZE))
 
 
 '''
@@ -107,14 +118,14 @@ def update_forest(old_forest) -> list:
     new_forest = [[NEW_SYMBOL for _ in range(MAP_HEIGHT)] for _ in range(MAP_WIDTH)]
     for x_coord in range(MAP_WIDTH):
         for y_coord in range(MAP_HEIGHT):
-            if new_forest[x_coord][y_coord] != NEW_SYMBOL: # Cell già settata
+            if new_forest[x_coord][y_coord] != NEW_SYMBOL:
                 continue
 
             if old_forest[x_coord][y_coord] == EMPTY_SYMBOL and random.random() <= GROW_CHANCE:
                 new_forest[x_coord][y_coord] = TREE_SYMBOL
             elif old_forest[x_coord][y_coord] == TREE_SYMBOL and random.random() <= FIRE_CHANCE:
                 new_forest[x_coord][y_coord] = FIRE_SYMBOL
-            elif old_forest[x_coord][y_coord] == FIRE_SYMBOL:
+            elif old_forest[x_coord][y_coord] == FIRE_SYMBOL or old_forest[x_coord][y_coord] == BONFIRE_SYMBOL:
                 for ix_coord in range(-1, 2):
                     for iy_coord in range(-1, 2):
                         if x_coord + ix_coord >= 0 and y_coord + iy_coord >= 0:

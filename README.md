@@ -39,6 +39,7 @@ Segui questi passaggi per eseguire il progetto sul tuo computer:
 ## 🎮 Come funziona
 
 - La foresta viene generata in modo casuale in base a una **densità di alberi** predefinita.  
+- Clicca con il `mouse` per **piazzare** un falò.
 - Premi `Space` per **avviare** la simulazione.
 - Durante ogni iterazione della simulazione:  
   - Gli alberi possono **crescere** su celle vuote con una certa probabilità.  
@@ -51,6 +52,7 @@ Segui questi passaggi per eseguire il progetto sul tuo computer:
 
 ## 📋 Controlli
 
+- **Mouse**: Metti il falò.
 - **R**: Rigenera la foresta con una nuova mappa casuale.  
 - **Space**: Avvia la generazione casuale del fuoco.  
 - **Esc**: Chiudi la simulazione.
