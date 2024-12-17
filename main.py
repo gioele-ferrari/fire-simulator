@@ -15,8 +15,8 @@ MAP_WIDTH: int = SCREEN_WIDTH // TILE_SIZE
 MAP_HEIGHT: int = SCREEN_HEIGHT // TILE_SIZE
 
 FOREST_DENSITY: int = 0.9 # Densità del 20%
-GROW_CHANCE = 0.0
-FIRE_CHANCE = 0.3
+GROW_CHANCE = 0.2
+FIRE_CHANCE = 0.1
 
 COLOR_GREEN = (137, 234, 123)
 TREE_IMG = pygame.image.load(os.path.join("images", "tree.png")).convert_alpha()
@@ -26,6 +26,12 @@ FIRE_IMG = pygame.image.load(os.path.join("images", "fire.png")).convert_alpha()
 FIRE_IMG = pygame.transform.scale(FIRE_IMG, (TILE_SIZE, TILE_SIZE))
 
 STEP_TIMER = 1.2
+
+FIRE_SYMBOL = "F"
+TREE_SYMBOL = "T"
+NEW_SYMBOL = "N"
+EMPTY_SYMBOL = "E"
+
 clock = pygame.time.Clock()
 pygame.display.set_icon(TREE_IMG)
 pygame.display.set_caption("Fire Simulator")
@@ -37,7 +43,7 @@ pygame.display.set_caption("Fire Simulator")
 
 def main() -> None:
     forest = generate_forest()
-    spawn_fire = False
+    start_simulation = False
 
     while True:
         for event in pygame.event.get():
@@ -47,13 +53,14 @@ def main() -> None:
             if event.type == pygame.KEYDOWN:
                 if event.key== pygame.K_r:
                     forest = generate_forest()
-                    spawn_fire = False
+                    start_simulation = False
                 elif event.key== pygame.K_SPACE:
-                    spawn_fire = True
+                    start_simulation = True
 
         screen.fill(COLOR_GREEN)
         display_forest(forest)
-        forest = update_forest(forest, spawn_fire)
+        if start_simulation:
+            forest = update_forest(forest)
         pygame.display.update()
         clock.tick(STEP_TIMER)
 
@@ -64,11 +71,11 @@ def main() -> None:
     un albero.
 '''
 def generate_forest() -> list:
-    forest_map = [[" " for _ in range(MAP_HEIGHT)] for _ in range(MAP_WIDTH)]
+    forest_map = [[EMPTY_SYMBOL for _ in range(MAP_HEIGHT)] for _ in range(MAP_WIDTH)]
     for x_coord in range(MAP_WIDTH):
         for y_coord in range(MAP_HEIGHT):
             if random.random() <= FOREST_DENSITY:
-                forest_map[x_coord][y_coord] = "T"
+                forest_map[x_coord][y_coord] = TREE_SYMBOL
     return forest_map
 
 
@@ -80,9 +87,9 @@ def generate_forest() -> list:
 def display_forest(forest) -> None:
     for x_coord in range(MAP_WIDTH):
         for y_coord in range(MAP_HEIGHT):
-            if forest[x_coord][y_coord] == "T":
+            if forest[x_coord][y_coord] == TREE_SYMBOL:
                 screen.blit(TREE_IMG, (x_coord * TILE_SIZE, y_coord * TILE_SIZE))
-            elif forest[x_coord][y_coord] == "F":
+            elif forest[x_coord][y_coord] == FIRE_SYMBOL:
                 screen.blit(FIRE_IMG, (x_coord * TILE_SIZE, y_coord * TILE_SIZE))
 
 
@@ -96,25 +103,25 @@ def display_forest(forest) -> None:
     - Se nella vecchia foresta c'era un fuoco: lo dobbiamo dividere tra i vicini
     - Altrimenti rimane invariata
 '''
-def update_forest(old_forest, spawn_fire) -> list:
-    new_forest = [["O" for _ in range(MAP_HEIGHT)] for _ in range(MAP_WIDTH)]
+def update_forest(old_forest) -> list:
+    new_forest = [[NEW_SYMBOL for _ in range(MAP_HEIGHT)] for _ in range(MAP_WIDTH)]
     for x_coord in range(MAP_WIDTH):
         for y_coord in range(MAP_HEIGHT):
-            if new_forest[x_coord][y_coord] != "O":
+            if new_forest[x_coord][y_coord] != NEW_SYMBOL: # Cell già settata
                 continue
 
-            if old_forest[x_coord][y_coord] == " " and random.random() <= GROW_CHANCE:
-                new_forest[x_coord][y_coord] = "T"
-            elif old_forest[x_coord][y_coord] == "T" and random.random() <= FIRE_CHANCE and spawn_fire:
-                new_forest[x_coord][y_coord] = "F"
-            elif old_forest[x_coord][y_coord] == "F":
+            if old_forest[x_coord][y_coord] == EMPTY_SYMBOL and random.random() <= GROW_CHANCE:
+                new_forest[x_coord][y_coord] = TREE_SYMBOL
+            elif old_forest[x_coord][y_coord] == TREE_SYMBOL and random.random() <= FIRE_CHANCE:
+                new_forest[x_coord][y_coord] = FIRE_SYMBOL
+            elif old_forest[x_coord][y_coord] == FIRE_SYMBOL:
                 for ix_coord in range(-1, 2):
                     for iy_coord in range(-1, 2):
                         if x_coord + ix_coord >= 0 and y_coord + iy_coord >= 0:
                             if x_coord + ix_coord <= (MAP_WIDTH - 1) and y_coord + iy_coord <= (MAP_HEIGHT - 1):
-                                if old_forest[x_coord + ix_coord][y_coord + iy_coord] == "T":
-                                    new_forest[x_coord + ix_coord][y_coord + iy_coord] = "F"
-                new_forest[x_coord][y_coord] = " "
+                                if old_forest[x_coord + ix_coord][y_coord + iy_coord] == TREE_SYMBOL:
+                                    new_forest[x_coord + ix_coord][y_coord + iy_coord] = FIRE_SYMBOL
+                new_forest[x_coord][y_coord] = EMPTY_SYMBOL
             else:
                 new_forest[x_coord][y_coord] = old_forest[x_coord][y_coord]
     return new_forest
