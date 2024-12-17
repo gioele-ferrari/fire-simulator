@@ -4,7 +4,7 @@ import pygame
 import sys
 import random
 
-SCREEN_WIDTH: int = 800
+SCREEN_WIDTH: int = 1200
 SCREEN_HEIGHT: int = 800
 TILE_SIZE: int = 40
 
@@ -14,7 +14,7 @@ screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 MAP_WIDTH: int = SCREEN_WIDTH // TILE_SIZE
 MAP_HEIGHT: int = SCREEN_HEIGHT // TILE_SIZE
 
-FOREST_DENSITY: int = 0.2 # Densità del 20%
+FOREST_DENSITY: int = 0.9 # Densità del 20%
 GROW_CHANCE = 0.0
 FIRE_CHANCE = 0.3
 
@@ -25,16 +25,20 @@ TREE_IMG = pygame.transform.scale(TREE_IMG, (TILE_SIZE, TILE_SIZE))
 FIRE_IMG = pygame.image.load(os.path.join("images", "fire.png")).convert_alpha()
 FIRE_IMG = pygame.transform.scale(FIRE_IMG, (TILE_SIZE, TILE_SIZE))
 
-STEP_TIMER = 2
+STEP_TIMER = 1.2
 clock = pygame.time.Clock()
-
+pygame.display.set_icon(TREE_IMG)
+pygame.display.set_caption("Fire Simulator")
 
 '''
     Funzione che gestisce il metodo principale di tutto il programma, quì si regolano
     le iterazioni e si gestiscono input come il reset o pulire la mappa.
 '''
+
 def main() -> None:
     forest = generate_forest()
+    spawn_fire = False
+
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -43,10 +47,13 @@ def main() -> None:
             if event.type == pygame.KEYDOWN:
                 if event.key== pygame.K_r:
                     forest = generate_forest()
+                    spawn_fire = False
+                elif event.key== pygame.K_SPACE:
+                    spawn_fire = True
 
         screen.fill(COLOR_GREEN)
         display_forest(forest)
-        forest = update_forest(forest)
+        forest = update_forest(forest, spawn_fire)
         pygame.display.update()
         clock.tick(STEP_TIMER)
 
@@ -89,7 +96,7 @@ def display_forest(forest) -> None:
     - Se nella vecchia foresta c'era un fuoco: lo dobbiamo dividere tra i vicini
     - Altrimenti rimane invariata
 '''
-def update_forest(old_forest) -> list:
+def update_forest(old_forest, spawn_fire) -> list:
     new_forest = [["O" for _ in range(MAP_HEIGHT)] for _ in range(MAP_WIDTH)]
     for x_coord in range(MAP_WIDTH):
         for y_coord in range(MAP_HEIGHT):
@@ -98,7 +105,7 @@ def update_forest(old_forest) -> list:
 
             if old_forest[x_coord][y_coord] == " " and random.random() <= GROW_CHANCE:
                 new_forest[x_coord][y_coord] = "T"
-            elif old_forest[x_coord][y_coord] == "T" and random.random() <= FIRE_CHANCE:
+            elif old_forest[x_coord][y_coord] == "T" and random.random() <= FIRE_CHANCE and spawn_fire:
                 new_forest[x_coord][y_coord] = "F"
             elif old_forest[x_coord][y_coord] == "F":
                 for ix_coord in range(-1, 2):

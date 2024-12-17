@@ -22,19 +22,24 @@ Segui questi passaggi per eseguire il progetto sul tuo computer:
    pip install pygame
    ```
 
-3. **Esegui il progetto**: Avvia lo script principale con Python:
+3. **Entra nel progetto**: Entra nella cartella del progetto:
 
    ```bash
-   python main.py
+   cd fire-simulator
    ```
 
-Una volta avviato, la finestra di simulazione mostrerà una griglia 20x20 con alberi e fuoco animati.
+4. **Esegui il progetto**: Avvia lo script principale con Python:
+
+   ```bash
+   py main.py
+   ```
 
 ---
 
 ## 🎮 Come funziona
 
 - La foresta viene generata in modo casuale in base a una **densità di alberi** predefinita.  
+- Premi `Space` per **avviare** la simulazione.
 - Durante ogni iterazione della simulazione:  
   - Gli alberi possono **crescere** su celle vuote con una certa probabilità.  
   - Gli alberi esistenti possono **prendere fuoco** casualmente.  
@@ -47,4 +52,5 @@ Una volta avviato, la finestra di simulazione mostrerà una griglia 20x20 con al
 ## 📋 Controlli
 
 - **R**: Rigenera la foresta con una nuova mappa casuale.  
+- **Space**: Avvia la generazione casuale del fuoco.  
 - **Esc**: Chiudi la simulazione.
